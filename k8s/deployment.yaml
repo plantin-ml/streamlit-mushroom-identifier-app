@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streamlit-mushroom-identifier
+  labels:
+    plantin.ml/streamlit-app: mushroom-identifier
+  namespace: plantin-stage-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      plantin.ml/streamlit-app: mushroom-identifier
+  template:
+    metadata:
+      labels:
+        plantin.ml/streamlit-app: mushroom-identifier
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - "cpu-inference"
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: gpu-inference
+        effect: NoSchedule
+      containers:
+      - image: 414252687335.dkr.ecr.us-east-1.amazonaws.com/streamlit-mushroom-app:latest
+        imagePullPolicy: Always
+        name: streamlit-mushroom-identifier
+        env:
+        - name: API_CLASSIFICATOR_ENDPOINT
+          value: "http://mushroom-classification.models.ml.myplantin.com/predict_by_file"
+        - name: API_DETECTION_ENDPOINT
+          value: "http://mushroom-detection.models.ml.myplantin.com/render"
+        ports:
+        - containerPort: 8501
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
