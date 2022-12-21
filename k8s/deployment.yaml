@@ -27,10 +27,11 @@ spec:
       tolerations:
       - key: dedicated
         operator: Equal
-        value: cpu-inference
+        value: "cpu-inference"
         effect: NoSchedule
       containers:
       - image: 414252687335.dkr.ecr.us-east-1.amazonaws.com/streamlit-mushroom-app:latest
+        args: ["app.py", "--server.address=0.0.0.0", "--server.port=8501"]
         imagePullPolicy: Always
         name: streamlit-mushroom-identifier
         env:
